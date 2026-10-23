@@ -10,11 +10,25 @@
             background: #121212; 
             color: #e0e0e0;
             display: flex; 
-            justify-content: center; 
+            flex-direction: column;
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
+            padding: 20px 0;
+            box-sizing: border-box;
         }
+
+        /* TIÊU ĐỀ TRANG QUẢN TRỊ */
+        .main-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(77, 171, 247, 0.5);
+        }
+
         .login-container { 
             background: #1e1e1e; 
             padding: 30px; 
@@ -23,13 +37,21 @@
             width: 400px; 
             box-sizing: border-box; 
             border: 1px solid #333;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        .admin-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         .admin-container { 
             display: flex; 
             gap: 20px; 
             max-width: 950px; 
             width: 100%; 
-            padding: 20px; 
+            padding: 0 20px; 
             box-sizing: border-box; 
         }
         .card { 
@@ -105,8 +127,11 @@
             transform: translateY(-1px);
         }
 
+        /* NÚT ĐĂNG XUẤT CÓ HIỆU ỨNG GLOW */
         .logout-btn { 
             background: #dc3545; 
+            width: 250px;
+            margin-top: 25px;
             box-shadow: 0 0 5px rgba(220, 53, 69, 0.4);
         }
         .logout-btn:hover { 
@@ -145,50 +170,50 @@
         <div id="loginError" style="color: #ff6b6b; text-align: center; margin-top: 10px; font-size: 12px;"></div>
     </div>
 
-    <!-- PHẦN BẢNG QUẢN TRỊ 2 CỘT (ẨN KHI CHƯA ĐĂNG NHẬP) -->
-    <div class="admin-container hidden" id="adminCard">
-        
-        <!-- CỘT 1: NẠP TIỀN THỦ CÔNG -->
-        <div class="card">
-            <h2>💳 Nạp Tiền Chat & Messenger</h2>
-            
-            <label>Mã Máy (HWID):</label>
-            <input type="text" id="hwid" placeholder="Dán mã PC_... của khách vào đây">
-            
-            <label>Số tiền cần cộng (VNĐ):</label>
-            <input type="number" id="amount" placeholder="Ví dụ: 50000">
-            
-            <button class="btn-green" onclick="addBalance()">Cộng Tiền Ngay</button>
-            <div id="resultBalance" class="result-box" style="color: #aaa;">Chưa có thao tác</div>
+    <!-- PHẦN BẢNG QUẢN TRỊ (ẨN KHI CHƯA ĐĂNG NHẬP) -->
+    <div class="admin-wrapper hidden" id="adminCard">
+        <div class="main-title">TRANG QUẢN TRỊ KEY</div>
+
+        <div class="admin-container">
+            <!-- CỘT 1: NẠP TIỀN THỦ CÔNG -->
+            <div class="card">
+                <h2>💳 Nạp Tiền Chat & Messenger</h2>
+                
+                <label>Mã Máy (HWID):</label>
+                <input type="text" id="hwid" placeholder="Dán mã PC_... của khách vào đây">
+                
+                <label>Số tiền cần cộng (VNĐ):</label>
+                <input type="number" id="amount" placeholder="Ví dụ: 50000">
+                
+                <button class="btn-green" onclick="addBalance()">Cộng Tiền Ngay</button>
+                <div id="resultBalance" class="result-box" style="color: #aaa;">Chưa có thao tác</div>
+            </div>
+
+            <!-- CỘT 2: TẠO KEY HỆ THỐNG -->
+            <div class="card">
+                <h2>🔑 Tạo Key Hệ Thống</h2>
+                
+                <label>Chọn Server Key:</label>
+                <select id="serverType">
+                    <option value="tool_tong_hop">Key Tool Tổng Hợp</option>
+                    <option value="callog">Key Callog</option>
+                    <option value="huy_hang">Web - Key Hủy Hàng (Y/C hoàn)</option>
+                    <option value="kien_van_de">Web - Key Kiện Vấn Đề</option>
+                    <option value="loc_hang">Web - Key Lọc Hàng Hủy</option>
+                </select>
+                
+                <label>Thời hạn (Số ngày):</label>
+                <input type="number" id="keyDays" placeholder="Ví dụ: 30, 90..." value="30">
+                
+                <button class="btn-blue" onclick="generateKey()">Tạo Key Mới</button>
+                
+                <label style="margin-top: 15px;">Kết quả Key:</label>
+                <div id="resultKey" class="result-box" style="color: #4dabf7; font-weight: bold;">Chưa tạo key nào</div>
+            </div>
         </div>
 
-        <!-- CỘT 2: TẠO KEY HỆ THỐNG -->
-        <div class="card">
-            <h2>🔑 Tạo Key Hệ Thống</h2>
-            
-            <label>Chọn Server Key:</label>
-            <select id="serverType">
-                <option value="tool_tong_hop">Key Tool Tổng Hợp</option>
-                <option value="callog">Key Callog</option>
-                <option value="huy_hang">Web - Key Hủy Hàng (Y/C hoàn)</option>
-                <option value="kien_van_de">Web - Key Kiện Vấn Đề</option>
-                <option value="loc_hang">Web - Key Lọc Hàng Hủy</option>
-            </select>
-            
-            <label>Thời hạn (Số ngày):</label>
-            <input type="number" id="keyDays" placeholder="Ví dụ: 30, 90..." value="30">
-            
-            <button class="btn-blue" onclick="generateKey()">Tạo Key Mới</button>
-            
-            <label style="margin-top: 15px;">Kết quả Key:</label>
-            <div id="resultKey" class="result-box" style="color: #4dabf7; font-weight: bold;">Chưa tạo key nào</div>
-        </div>
-
-    </div>
-
-    <!-- NÚT ĐĂNG XUẤT GÓC TRÊN BÊN PHẢI -->
-    <div style="position: absolute; top: 20px; right: 30px;" id="logoutWrapper" class="hidden">
-        <button class="logout-btn" style="width: auto; padding: 10px 20px; margin: 0;" onclick="handleLogout()">Đăng Xuất</button>
+        <!-- NÚT ĐĂNG XUẤT NẰM Ở DƯỚI CÙNG -->
+        <button class="logout-btn" onclick="handleLogout()">Đăng Xuất</button>
     </div>
 
     <script>
@@ -214,13 +239,11 @@
         function showAdminPanel() {
             document.getElementById('loginCard').classList.add('hidden');
             document.getElementById('adminCard').classList.remove('hidden');
-            document.getElementById('logoutWrapper').classList.remove('hidden');
         }
 
         function handleLogout() {
             localStorage.removeItem("isLoggedIn");
             document.getElementById('adminCard').classList.add('hidden');
-            document.getElementById('logoutWrapper').classList.add('hidden');
             document.getElementById('loginCard').classList.remove('hidden');
             document.getElementById('username').value = "";
             document.getElementById('password').value = "";
