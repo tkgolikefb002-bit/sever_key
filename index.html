@@ -18,7 +18,6 @@
             box-sizing: border-box;
         }
 
-        /* TIÊU ĐỀ TRANG QUẢN TRỊ */
         .main-title {
             color: #ffffff;
             font-size: 24px;
@@ -93,7 +92,6 @@
             border-color: #4dabf7;
         }
         
-        /* HIỆU ỨNG NÚT PHÁT SÁNG (GLOW) KHI TRỎ CHUỘT */
         button { 
             width: 100%; 
             padding: 12px; 
@@ -127,7 +125,6 @@
             transform: translateY(-1px);
         }
 
-        /* NÚT ĐĂNG XUẤT CÓ HIỆU ỨNG GLOW */
         .logout-btn { 
             background: #dc3545; 
             width: 250px;
@@ -157,7 +154,7 @@
 </head>
 <body>
 
-    <!-- PHẦN ĐĂNG NHẬP -->
+    <!-- ĐĂNG NHẬP -->
     <div class="login-container" id="loginCard">
         <h2>🔐 Đăng Nhập Quản Trị</h2>
         <label>Tên đăng nhập:</label>
@@ -170,12 +167,12 @@
         <div id="loginError" style="color: #ff6b6b; text-align: center; margin-top: 10px; font-size: 12px;"></div>
     </div>
 
-    <!-- PHẦN BẢNG QUẢN TRỊ (ẨN KHI CHƯA ĐĂNG NHẬP) -->
+    <!-- QUẢN TRỊ -->
     <div class="admin-wrapper hidden" id="adminCard">
         <div class="main-title">TRANG QUẢN TRỊ KEY</div>
 
         <div class="admin-container">
-            <!-- CỘT 1: NẠP TIỀN THỦ CÔNG -->
+            <!-- CỘT 1: NẠP TIỀN -->
             <div class="card">
                 <h2>💳 Nạp Tiền Chat & Messenger</h2>
                 
@@ -194,7 +191,7 @@
                 <h2>🔑 Tạo Key Hệ Thống</h2>
                 
                 <label>Chọn Server Key:</label>
-                <select id="serverType">
+                <select id="serverType" onchange="updateDurationOptions()">
                     <option value="tool_tong_hop">Key Tool Tổng Hợp</option>
                     <option value="callog">Key Callog</option>
                     <option value="huy_hang">Web - Key Hủy Hàng (Y/C hoàn)</option>
@@ -202,8 +199,10 @@
                     <option value="loc_hang">Web - Key Lọc Hàng Hủy</option>
                 </select>
                 
-                <label>Thời hạn (Số ngày):</label>
-                <input type="number" id="keyDays" placeholder="Ví dụ: 30, 90..." value="30">
+                <label>Thời hạn:</label>
+                <select id="keyDuration">
+                    <!-- Sẽ tự động thay đổi mốc thời gian qua JavaScript -->
+                </select>
                 
                 <button class="btn-blue" onclick="generateKey()">Tạo Key Mới</button>
                 
@@ -212,7 +211,6 @@
             </div>
         </div>
 
-        <!-- NÚT ĐĂNG XUẤT NẰM Ở DƯỚI CÙNG -->
         <button class="logout-btn" onclick="handleLogout()">Đăng Xuất</button>
     </div>
 
@@ -221,6 +219,42 @@
             if(localStorage.getItem("isLoggedIn") === "true") {
                 showAdminPanel();
             }
+            updateDurationOptions(); // Khởi tạo mốc thời gian mặc định
+        }
+
+        // Tự động thay đổi danh sách mốc thời gian phù hợp với từng Server được chọn
+        function updateDurationOptions() {
+            const serverType = document.getElementById('serverType').value;
+            const durationSelect = document.getElementById('keyDuration');
+            durationSelect.innerHTML = "";
+
+            let options = [];
+            if (serverType === "tool_tong_hop") {
+                // Key tool tổng hợp dùng đuôi d / m
+                options = [
+                    {text: "1 Ngày (1d)", value: "1d"},
+                    {text: "3 Ngày (3d)", value: "3d"},
+                    {text: "7 Ngày (7d)", value: "7d"},
+                    {text: "1 Tháng (1m)", value: "1m"}
+                ];
+            } else {
+                // Các server còn lại dùng số ngày chuẩn
+                options = [
+                    {text: "1 Ngày", value: "1"},
+                    {text: "3 Ngày", value: "3"},
+                    {text: "7 Ngày", value: "7"},
+                    {text: "15 Ngày", value: "15"},
+                    {text: "30 Ngày", value: "30"},
+                    {text: "365 Ngày (1 Năm)", value: "365"}
+                ];
+            }
+
+            options.forEach(opt => {
+                let el = document.createElement("option");
+                el.value = opt.value;
+                el.textContent = opt.text;
+                durationSelect.appendChild(el);
+            });
         }
 
         function handleLogin() {
@@ -291,26 +325,20 @@
 
         async function generateKey() {
             const serverType = document.getElementById('serverType').value;
-            const days = document.getElementById('keyDays').value.trim();
+            const duration = document.getElementById('keyDuration').value;
             const resKeyDiv = document.getElementById('resultKey');
-
-            if(!days || days <= 0) {
-                resKeyDiv.style.color = '#ff6b6b';
-                resKeyDiv.innerText = 'Vui lòng nhập số ngày hợp lệ!';
-                return;
-            }
 
             let targetUrl = "";
             if (serverType === "tool_tong_hop") {
-                targetUrl = `https://tm-key-server.tkgolikefb002.workers.dev/create?type=${days}d`;
+                targetUrl = `https://tm-key-server.tkgolikefb002.workers.dev/create?type=${duration}`;
             } else if (serverType === "callog") {
-                targetUrl = `https://autocall-license.tkgolikefb002.workers.dev/create?days=${days}`;
+                targetUrl = `https://autocall-license.tkgolikefb002.workers.dev/create?days=${duration}`;
             } else if (serverType === "huy_hang") {
-                targetUrl = `https://huyhangweb.tkgolikefb002.workers.dev/create-key?days=${days}`;
+                targetUrl = `https://huyhangweb.tkgolikefb002.workers.dev/create-key?days=${duration}`;
             } else if (serverType === "kien_van_de") {
-                targetUrl = `https://kienvande.tkgolikefb002.workers.dev/create-key?days=${days}`;
+                targetUrl = `https://kienvande.tkgolikefb002.workers.dev/create-key?days=${duration}`;
             } else if (serverType === "loc_hang") {
-                targetUrl = `https://lochang.tkgolikefb002.workers.dev/create-key?days=${days}`;
+                targetUrl = `https://lochang.tkgolikefb002.workers.dev/create-key?days=${duration}`;
             }
 
             resKeyDiv.style.color = '#aaa';
