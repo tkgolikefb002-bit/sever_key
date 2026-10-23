@@ -149,6 +149,7 @@
             min-height: 24px; 
             text-align: center; 
             color: #ddd;
+            user-select: all;
         }
     </style>
 </head>
@@ -201,7 +202,7 @@
                 
                 <label>Thời hạn:</label>
                 <select id="keyDuration">
-                    <!-- Sẽ tự động thay đổi mốc thời gian qua JavaScript -->
+                    <!-- Tự động cập nhật qua JS -->
                 </select>
                 
                 <button class="btn-blue" onclick="generateKey()">Tạo Key Mới</button>
@@ -219,10 +220,9 @@
             if(localStorage.getItem("isLoggedIn") === "true") {
                 showAdminPanel();
             }
-            updateDurationOptions(); // Khởi tạo mốc thời gian mặc định
+            updateDurationOptions();
         }
 
-        // Tự động thay đổi danh sách mốc thời gian phù hợp với từng Server được chọn
         function updateDurationOptions() {
             const serverType = document.getElementById('serverType').value;
             const durationSelect = document.getElementById('keyDuration');
@@ -230,7 +230,6 @@
 
             let options = [];
             if (serverType === "tool_tong_hop") {
-                // Key tool tổng hợp dùng đuôi d / m
                 options = [
                     {text: "1 Ngày (1d)", value: "1d"},
                     {text: "3 Ngày (3d)", value: "3d"},
@@ -238,7 +237,6 @@
                     {text: "1 Tháng (1m)", value: "1m"}
                 ];
             } else {
-                // Các server còn lại dùng số ngày chuẩn
                 options = [
                     {text: "1 Ngày", value: "1"},
                     {text: "3 Ngày", value: "3"},
@@ -348,11 +346,20 @@
                 let response = await fetch(targetUrl);
                 let textResult = await response.text();
                 
-                resKeyDiv.style.color = '#51cf66';
-                resKeyDiv.innerText = textResult;
+                try {
+                    let json = JSON.parse(textResult);
+                    let actualKey = json.key || json.license || json.code || json.message || textResult;
+                    
+                    resKeyDiv.style.color = '#51cf66';
+                    resKeyDiv.innerText = actualKey;
+                } catch(err) {
+                    resKeyDiv.style.color = '#51cf66';
+                    resKeyDiv.innerText = textResult;
+                }
+
             } catch(e) {
                 resKeyDiv.style.color = '#ff6b6b';
-                resKeyDiv.innerText = '❌ Không thể kết nối tới server tạo key (Lỗi CORS hoặc Worker lỗi)!';
+                resKeyDiv.innerText = '❌ Không thể kết nối tới server tạo key!';
             }
         }
     </script>
