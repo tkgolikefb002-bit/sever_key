@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Quản Lý Nạp Tiền Tool</title>
+    <title>Admin - Quản Lý Nạp Tiền & Tạo Key</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; box-sizing: border-box; }
-        h2 { color: #1877F2; text-align: center; margin-bottom: 20px; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .login-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; box-sizing: border-box; }
+        .admin-container { display: flex; gap: 20px; max-width: 900px; width: 100%; padding: 20px; box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1; box-sizing: border-box; }
+        h2 { color: #1877F2; text-align: center; margin-bottom: 20px; font-size: 20px; }
         label { font-weight: bold; font-size: 13px; color: #333; display: block; margin-top: 12px; }
-        input, button { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccd0d5; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        input, select, button { width: 100%; padding: 11px; margin-top: 6px; border: 1px solid #ccd0d5; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 18px; }
         button:hover { background: #218838; }
         .hidden { display: none; }
-        #result { margin-top: 15px; text-align: center; font-weight: bold; font-size: 13px; }
+        .result-box { margin-top: 15px; padding: 10px; background: #f8f9fa; border: 1px dashed #ccc; border-radius: 6px; word-break: break-all; font-size: 13px; min-height: 24px; text-align: center; }
         .logout-btn { background: #dc3545; margin-top: 10px; }
         .logout-btn:hover { background: #c82333; }
+        .logout-container { text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <!-- PHẦN ĐĂNG NHẬP -->
-    <div class="card" id="loginCard">
+    <div class="login-container" id="loginCard">
         <h2>🔐 Đăng Nhập Quản Trị</h2>
         <label>Tên đăng nhập:</label>
         <input type="text" id="username" placeholder="Nhập tên đăng nhập...">
@@ -33,24 +36,53 @@
         <div id="loginError" style="color: red; text-align: center; margin-top: 10px; font-size: 12px;"></div>
     </div>
 
-    <!-- PHẦN BẢNG QUẢN TRỊ (ẨN KHI CHƯA ĐĂNG NHẬP) -->
-    <div class="card hidden" id="adminCard">
-        <h2>💳 Nạp Tiền Thủ Công</h2>
+    <!-- PHẦN BẢNG QUẢN TRỊ 2 CỘT (ẨN KHI CHƯA ĐĂNG NHẬP) -->
+    <div class="admin-container hidden" id="adminCard">
         
-        <label>Mã Máy (HWID):</label>
-        <input type="text" id="hwid" placeholder="Dán mã PC_... của khách vào đây">
-        
-        <label>Số tiền cần cộng (VNĐ):</label>
-        <input type="number" id="amount" placeholder="Ví dụ: 50000">
-        
-        <button onclick="addBalance()">Cộng Tiền Ngay</button>
-        <button class="logout-btn" onclick="handleLogout()">Đăng Xuất</button>
-        
-        <div id="result"></div>
+        <!-- CỘT 1: NẠP TIỀN THỦ CÔNG -->
+        <div class="card">
+            <h2>💳 Nạp Tiền Chat & Messenger</h2>
+            
+            <label>Mã Máy (HWID):</label>
+            <input type="text" id="hwid" placeholder="Dán mã PC_... của khách vào đây">
+            
+            <label>Số tiền cần cộng (VNĐ):</label>
+            <input type="number" id="amount" placeholder="Ví dụ: 50000">
+            
+            <button onclick="addBalance()">Cộng Tiền Ngay</button>
+            <div id="resultBalance" class="result-box" style="color: gray;">Chưa có thao tác</div>
+        </div>
+
+        <!-- CỘT 2: TẠO KEY HỆ THỐNG -->
+        <div class="card">
+            <h2>🔑 Tạo Key Hệ Thống</h2>
+            
+            <label>Chọn Server Key:</label>
+            <select id="serverType">
+                <option value="tool_tong_hop">Key Tool Tổng Hợp</option>
+                <option value="callog">Key Callog</option>
+                <option value="huy_hang">Web - Key Hủy Hàng (Y/C hoàn)</option>
+                <option value="kien_van_de">Web - Key Kiện Vấn Đề</option>
+                <option value="loc_hang">Web - Key Lọc Hàng Hủy</option>
+            </select>
+            
+            <label>Thời hạn (Số ngày):</label>
+            <input type="number" id="keyDays" placeholder="Ví dụ: 30, 90..." value="30">
+            
+            <button onclick="generateKey()" style="background: #007bff;">Tạo Key Mới</button>
+            
+            <label style="margin-top: 15px;">Kết quả Key:</label>
+            <div id="resultKey" class="result-box" style="background: #e9ecef; font-weight: bold; color: #333;">Chưa tạo key nào</div>
+        </div>
+
+    </div>
+
+    <!-- NÚT ĐĂNG XUẤT ĐẶT DƯỚI CÙNG HOẶC RIÊNG BIỆT -->
+    <div style="position: absolute; top: 20px; right: 30px;" id="logoutWrapper" class="hidden">
+        <button class="logout-btn" style="width: auto; padding: 8px 15px; margin: 0;" onclick="handleLogout()">Đăng Xuất</button>
     </div>
 
     <script>
-        // Kiểm tra xem đã đăng nhập từ trước chưa
         window.onload = function() {
             if(localStorage.getItem("isLoggedIn") === "true") {
                 showAdminPanel();
@@ -62,7 +94,6 @@
             const pass = document.getElementById('password').value.trim();
             const errDiv = document.getElementById('loginError');
 
-            // Thông tin tài khoản bạn yêu cầu
             if(user === "admin" && pass === "Acb@4702001") {
                 localStorage.setItem("isLoggedIn", "true");
                 showAdminPanel();
@@ -74,21 +105,23 @@
         function showAdminPanel() {
             document.getElementById('loginCard').classList.add('hidden');
             document.getElementById('adminCard').classList.remove('hidden');
+            document.getElementById('logoutWrapper').classList.remove('hidden');
         }
 
         function handleLogout() {
             localStorage.removeItem("isLoggedIn");
             document.getElementById('adminCard').classList.add('hidden');
+            document.getElementById('logoutWrapper').classList.add('hidden');
             document.getElementById('loginCard').classList.remove('hidden');
             document.getElementById('username').value = "";
             document.getElementById('password').value = "";
-            document.getElementById('result').innerText = "";
         }
 
+        // Xử lý nạp tiền
         async function addBalance() {
             const hwid = document.getElementById('hwid').value.trim();
             const amount = document.getElementById('amount').value;
-            const resDiv = document.getElementById('result');
+            const resDiv = document.getElementById('resultBalance');
 
             if(!hwid || !amount) {
                 resDiv.style.color = 'red';
@@ -100,12 +133,11 @@
             resDiv.innerText = 'Đang xử lý...';
 
             try {
-                // Link gọi đến Worker của bạn (đã gán mật khẩu ngầm định bên trong Worker)
                 let response = await fetch('https://chat.tkgolikefb002.workers.dev/add_balance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        secret: "admin123", // Khớp với biến ADMIN_SECRET trong Cloudflare Worker
+                        secret: "admin123", 
                         hwid: hwid, 
                         amount: parseFloat(amount) 
                     })
@@ -123,6 +155,50 @@
             } catch(e) {
                 resDiv.style.color = 'red';
                 resDiv.innerText = '❌ Lỗi kết nối hệ thống!';
+            }
+        }
+
+        // Xử lý tạo Key tự động dựa trên cấu trúc API bạn cung cấp
+        async function generateKey() {
+            const serverType = document.getElementById('serverType').value;
+            const days = document.getElementById('keyDays').value.trim();
+            const resKeyDiv = document.getElementById('resultKey');
+
+            if(!days || days <= 0) {
+                resKeyDiv.style.color = 'red';
+                resKeyDiv.innerText = 'Vui lòng nhập số ngày hợp lệ!';
+                return;
+            }
+
+            let targetUrl = "";
+
+            // Xây dựng đường dẫn API theo đúng cấu trúc bạn yêu cầu
+            if (serverType === "tool_tong_hop") {
+                // Key tool tổng hợp dùng tham số type (ví dụ: 1d, 30d...) hoặc ghép chuỗi ngày
+                targetUrl = `https://tm-key-server.tkgolikefb002.workers.dev/create?type=${days}d`;
+            } else if (serverType === "callog") {
+                targetUrl = `https://autocall-license.tkgolikefb002.workers.dev/create?days=${days}`;
+            } else if (serverType === "huy_hang") {
+                targetUrl = `https://huyhangweb.tkgolikefb002.workers.dev/create-key?days=${days}`;
+            } else if (serverType === "kien_van_de") {
+                targetUrl = `https://kienvande.tkgolikefb002.workers.dev/create-key?days=${days}`;
+            } else if (serverType === "loc_hang") {
+                targetUrl = `https://lochang.tkgolikefb002.workers.dev/create-key?days=${days}`;
+            }
+
+            resKeyDiv.style.color = 'gray';
+            resKeyDiv.innerText = 'Đang tạo key từ server...';
+
+            try {
+                let response = await fetch(targetUrl);
+                let textResult = await response.text();
+                
+                // Hiển thị kết quả trả về từ Worker tạo key
+                resKeyDiv.style.color = 'green';
+                resKeyDiv.innerText = textResult;
+            } catch(e) {
+                resKeyDiv.style.color = 'red';
+                resKeyDiv.innerText = '❌ Không thể kết nối tới server tạo key (Lỗi CORS hoặc Worker lỗi)!';
             }
         }
     </script>
