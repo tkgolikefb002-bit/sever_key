@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản Lý Nạp Tiền Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; box-sizing: border-box; }
+        h2 { color: #1877F2; text-align: center; margin-bottom: 20px; }
+        label { font-weight: bold; font-size: 13px; color: #333; display: block; margin-top: 12px; }
+        input, button { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccd0d5; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #218838; }
+        .hidden { display: none; }
+        #result { margin-top: 15px; text-align: center; font-weight: bold; font-size: 13px; }
+        .logout-btn { background: #dc3545; margin-top: 10px; }
+        .logout-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+
+    <!-- PHẦN ĐĂNG NHẬP -->
+    <div class="card" id="loginCard">
+        <h2>🔐 Đăng Nhập Quản Trị</h2>
+        <label>Tên đăng nhập:</label>
+        <input type="text" id="username" placeholder="Nhập tên đăng nhập...">
+        
+        <label>Mật khẩu:</label>
+        <input type="password" id="password" placeholder="Nhập mật khẩu...">
+        
+        <button onclick="handleLogin()">Đăng Nhập</button>
+        <div id="loginError" style="color: red; text-align: center; margin-top: 10px; font-size: 12px;"></div>
+    </div>
+
+    <!-- PHẦN BẢNG QUẢN TRỊ (ẨN KHI CHƯA ĐĂNG NHẬP) -->
+    <div class="card hidden" id="adminCard">
+        <h2>💳 Nạp Tiền Thủ Công</h2>
+        
+        <label>Mã Máy (HWID):</label>
+        <input type="text" id="hwid" placeholder="Dán mã PC_... của khách vào đây">
+        
+        <label>Số tiền cần cộng (VNĐ):</label>
+        <input type="number" id="amount" placeholder="Ví dụ: 50000">
+        
+        <button onclick="addBalance()">Cộng Tiền Ngay</button>
+        <button class="logout-btn" onclick="handleLogout()">Đăng Xuất</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Kiểm tra xem đã đăng nhập từ trước chưa
+        window.onload = function() {
+            if(localStorage.getItem("isLoggedIn") === "true") {
+                showAdminPanel();
+            }
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const errDiv = document.getElementById('loginError');
+
+            // Thông tin tài khoản bạn yêu cầu
+            if(user === "admin" && pass === "Acb@4702001") {
+                localStorage.setItem("isLoggedIn", "true");
+                showAdminPanel();
+            } else {
+                errDiv.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+            }
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginCard').classList.add('hidden');
+            document.getElementById('adminCard').classList.remove('hidden');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem("isLoggedIn");
+            document.getElementById('adminCard').classList.add('hidden');
+            document.getElementById('loginCard').classList.remove('hidden');
+            document.getElementById('username').value = "";
+            document.getElementById('password').value = "";
+            document.getElementById('result').innerText = "";
+        }
+
+        async function addBalance() {
+            const hwid = document.getElementById('hwid').value.trim();
+            const amount = document.getElementById('amount').value;
+            const resDiv = document.getElementById('result');
+
+            if(!hwid || !amount) {
+                resDiv.style.color = 'red';
+                resDiv.innerText = 'Vui lòng nhập đủ Mã Máy và Số Tiền!';
+                return;
+            }
+
+            resDiv.style.color = 'gray';
+            resDiv.innerText = 'Đang xử lý...';
+
+            try {
+                // Link gọi đến Worker của bạn (đã gán mật khẩu ngầm định bên trong Worker)
+                let response = await fetch('https://chat.tkgolikefb002.workers.dev/add_balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        secret: "admin123", // Khớp với biến ADMIN_SECRET trong Cloudflare Worker
+                        hwid: hwid, 
+                        amount: parseFloat(amount) 
+                    })
+                });
+                let data = await response.json();
+                if(data.success) {
+                    resDiv.style.color = 'green';
+                    resDiv.innerText = '✅ Thành công! Số dư mới: ' + data.new_balance.toLocaleString() + ' đ';
+                    document.getElementById('hwid').value = '';
+                    document.getElementById('amount').value = '';
+                } else {
+                    resDiv.style.color = 'red';
+                    resDiv.innerText = '❌ Lỗi: ' + (data.error || 'Thất bại');
+                }
+            } catch(e) {
+                resDiv.style.color = 'red';
+                resDiv.innerText = '❌ Lỗi kết nối hệ thống!';
+            }
+        }
+    </script>
+</body>
+</html>
